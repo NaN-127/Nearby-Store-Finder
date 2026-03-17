@@ -1,3 +1,4 @@
+import android.R.attr.password
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -24,13 +25,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nearbystorefinder.presentation.auth.components.CustomInputField
+import com.example.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.example.nearbystorefinder.ui.theme.NearoTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SignUpScreen() {
-    var fullName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+
+
+    val viewModel: AuthViewModel = koinViewModel()
+    val state = viewModel.state
+
     var passwordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
@@ -79,16 +84,16 @@ fun SignUpScreen() {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 CustomInputField(
-                    value = fullName,
-                    onValueChange = { fullName = it },
+                    value = state.fullName,
+                    onValueChange = viewModel::onFullNameChange,
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     focusManager = focusManager
                 )
 
                 CustomInputField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = state.email,
+                    onValueChange = viewModel::onEmailChange,
                     label = "Email",
                     placeholder = "Enter your email address",
                     keyboardType = KeyboardType.Email,
@@ -104,8 +109,8 @@ fun SignUpScreen() {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = state.password,
+                    onValueChange = viewModel::onPasswordChange,
                     placeholder = { Text("Create a password", color = Color.Gray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
