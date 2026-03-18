@@ -12,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key.Companion.Home
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.nan.nearbystorefinder.presentation.auth.screen.LoginScreen
+import com.nan.nearbystorefinder.presentation.navigation.AppNavGraph
 import com.nan.nearbystorefinder.ui.theme.NearoTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +24,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NearoTheme {
-                LoginScreen()
+                val navController: NavHostController = rememberNavController()
+                AppNavGraph(navController = navController)
             }
         }
     }

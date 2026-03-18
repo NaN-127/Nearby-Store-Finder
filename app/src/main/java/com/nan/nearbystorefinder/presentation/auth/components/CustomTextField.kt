@@ -26,7 +26,8 @@ fun CustomInputField(
     label: String,
     placeholder: String,
     keyboardType: KeyboardType = KeyboardType.Text,
-    focusManager: androidx.compose.ui.focus.FocusManager
+    focusManager: androidx.compose.ui.focus.FocusManager,
+    errorMessage: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
         Text(text = label, color = Color.White, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 8.dp))
@@ -37,6 +38,7 @@ fun CustomInputField(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
+            isError = errorMessage != null,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -44,7 +46,8 @@ fun CustomInputField(
                 unfocusedBorderColor = Color.Transparent,
                 cursorColor = Color.White,
                 focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White
+                unfocusedTextColor = Color.White,
+                errorBorderColor = MaterialTheme.colorScheme.error
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
@@ -52,5 +55,13 @@ fun CustomInputField(
             ),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
         )
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+            )
+        }
     }
 }

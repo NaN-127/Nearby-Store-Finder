@@ -14,7 +14,7 @@ class GoogleAuthClient(context: Context) {
         val options = GoogleSignInOptions.Builder(
             GoogleSignInOptions.DEFAULT_SIGN_IN
         )
-            .requestIdToken("442617280318-2u5eglhqm4jhm02p1lt02fpdnn5cd30q.apps.googleusercontent.com")
+            .requestIdToken("380447933423-k90aknbq3957b3i4fs8vsrkvo8r33a24.apps.googleusercontent.com")
             .requestEmail()
             .build()
 

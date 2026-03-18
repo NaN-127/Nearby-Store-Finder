@@ -1,4 +1,10 @@
+package com.nan.nearbystorefinder.presentation.auth.screen
+
 import android.R.attr.password
+import android.app.Activity.RESULT_OK
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,20 +31,68 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import com.nan.nearbystorefinder.core.auth.GoogleAuthClient
 import com.nan.nearbystorefinder.presentation.auth.components.CustomInputField
 import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.nan.nearbystorefinder.ui.theme.NearoTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
-fun SignUpScreen() {
+fun SignUpScreen(
+    onLoginClick: () -> Unit,
+    onSignUpSuccess: () -> Unit
+) {
 
 
+    val contextForToast = LocalContext.current
     val viewModel: AuthViewModel = koinViewModel()
     val state = viewModel.state
 
+    val googleAuthClient: GoogleAuthClient = koinInject()
+
+    LaunchedEffect(state.user, state.isAuthReady, state.error) {
+        if (state.isAuthReady && state.user != null) {
+            onSignUpSuccess()
+        }
+        if (state.error != null) {
+            android.widget.Toast.makeText(contextForToast, state.error, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        result ->
+
+        if(result.resultCode == RESULT_OK){
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+
+            try{
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+
+                if(idToken != null){
+                    viewModel.signInWithGoogle(idToken = idToken)
+                } else {
+                    android.widget.Toast.makeText(contextForToast, "Google Sign-In: ID Token is null", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }catch (e: ApiException){
+                e.printStackTrace()
+                android.widget.Toast.makeText(contextForToast, "Google Sign-In failed: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            }
+
+        }
+    }
+
+
     var passwordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
+
 
     NearoTheme {
         Surface(
@@ -88,7 +143,8 @@ fun SignUpScreen() {
                     onValueChange = viewModel::onFullNameChange,
                     label = "Full Name",
                     placeholder = "Enter your full name",
-                    focusManager = focusManager
+                    focusManager = focusManager,
+                    errorMessage = state.fullNameError
                 )
 
                 CustomInputField(
@@ -97,7 +153,8 @@ fun SignUpScreen() {
                     label = "Email",
                     placeholder = "Enter your email address",
                     keyboardType = KeyboardType.Email,
-                    focusManager = focusManager
+                    focusManager = focusManager,
+                    errorMessage = state.emailError
                 )
 
                 Text(
@@ -114,6 +171,7 @@ fun SignUpScreen() {
                     placeholder = { Text("Create a password", color = Color.Gray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
+                    isError = state.passwordError != null,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -121,7 +179,8 @@ fun SignUpScreen() {
                         unfocusedBorderColor = Color.Transparent,
                         cursorColor = Color.White,
                         focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedTextColor = Color.White,
+                        errorBorderColor = MaterialTheme.colorScheme.error
                     ),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
@@ -133,6 +192,17 @@ fun SignUpScreen() {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                 )
+
+                if (state.passwordError != null) {
+                    Text(
+                        text = state.passwordError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, top = 4.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -173,16 +243,22 @@ fun SignUpScreen() {
 
                 OutlinedButton(
                     onClick = {
-                        viewModel::signInWithGoogle
+                        launcher.launch(googleAuthClient.getSignInIntent())
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(28.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color.DarkGray),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                    enabled = !state.isLoading
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
                         Text("Sign up with Google")
                     }
                 }
@@ -195,7 +271,11 @@ fun SignUpScreen() {
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     Text("Already have an account? ", color = Color.Gray)
-                    TextButton(onClick = { }, contentPadding = PaddingValues(0.dp)) {
+                    TextButton(
+                        onClick = {
+                            onLoginClick()
+
+                    }, contentPadding = PaddingValues(0.dp)) {
                         Text("Log in", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -212,5 +292,5 @@ fun SignUpScreen() {
 @Composable
 fun SignUpPreview (
 
-) {SignUpScreen()
+) {SignUpScreen(onLoginClick = {}, onSignUpSuccess ={})
 }
