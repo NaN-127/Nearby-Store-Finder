@@ -12,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,12 +25,45 @@ import androidx.compose.ui.unit.sp
 import com.example.nearbystorefinder.presentation.auth.components.CustomInputField
 import com.example.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
+import android.app.Activity.RESULT_OK
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.example.nearbystorefinder.core.auth.GoogleAuthClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import org.koin.compose.koinInject
 
 @Composable
 fun LoginScreen() {
 
     val viewModel: AuthViewModel = koinViewModel()
     val state = viewModel.state
+
+    val context = LocalContext.current
+    val googleAuthClient: GoogleAuthClient = koinInject()
+
+    val launcher  = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        result ->
+
+        if(result.resultCode == RESULT_OK){
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try{
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+
+                if(idToken != null){
+                    viewModel.signInWithGoogle(idToken)
+                }
+            }catch (e: ApiException){
+                e.printStackTrace()
+            }
+        }
+    }
+
+
 
     var passwordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -170,7 +202,9 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedButton(
-                onClick = { },
+                onClick = {
+                    launcher.launch(googleAuthClient.getSignInIntent())
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

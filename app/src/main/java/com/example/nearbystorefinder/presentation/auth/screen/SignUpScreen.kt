@@ -137,7 +137,9 @@ fun SignUpScreen() {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = { },
+                    onClick = {
+                        viewModel::login
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -166,7 +168,9 @@ fun SignUpScreen() {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 OutlinedButton(
-                    onClick = { },
+                    onClick = {
+                        viewModel::signInWithGoogle
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
