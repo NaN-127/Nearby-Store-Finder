@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name=".MyApp"
+        android:name="com.nan.nearbystorefinder.MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -13,7 +13,7 @@
         android:theme="@style/Theme.NearbyStoreFinder">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.nan.nearbystorefinder.MainActivity"
             android:exported="true"
             android:label="Nearo"
             android:theme="@style/Theme.NearbyStoreFinder">
