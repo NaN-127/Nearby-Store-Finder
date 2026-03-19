@@ -1,79 +1,101 @@
 package com.nan.nearbystorefinder.presentation.home.screen
 
-import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import com.nan.nearbystorefinder.domain.model.Store
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import com.nan.nearbystorefinder.R
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
+import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
+
+import com.nan.nearbystorefinder.presentation.home.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    navController: NavController
 ){
-    val viewModel: AuthViewModel = koinViewModel()
+    val viewModel: HomeViewModel = koinViewModel()
     val state = viewModel.state
 
-    LaunchedEffect(state.user, state.isAuthReady) {
-        if (state.isAuthReady && state.user == null) {
-            onLogout()
-        }
-    }
+    // Use a Box to layer the background behind the entire Scaffold
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 1. Background Image stays here, ignores Scaffold padding
+        Image(
+            painter = painterResource(id = R.drawable.map_background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Home") },
-                actions = {
-                    IconButton(onClick = { viewModel.logout() }) {
-                        Icon(
-                            imageVector = Icons.Default.Logout,
-                            contentDescription = "Logout"
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+        // 2. Gradient Overlay
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Welcome!",
-                    style = MaterialTheme.typography.headlineMedium
+                .fillMaxWidth()
+                .height(250.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF0B0B0F),
+                            Color.Transparent
+                        )
+                    )
                 )
-                
-                Spacer(modifier = Modifier.height(8.dp))
+        )
 
-                Text(
-                    text = state.user?.email ?: "Email not available",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Button(
-                    onClick = { viewModel.logout() },
-                    shape = RoundedCornerShape(28.dp)
-                ) {
-                    Text("Logout Account")
-                }
+        // 3. The UI Layer
+        Scaffold(
+            containerColor = Color.Transparent, // Keeps the background visible
+            topBar = {
+                NearoTopAppBar()
+            },
+            bottomBar = {
+                NearoBottomBar(navController)
+            }
+        ) { paddingValues ->
+            // Only use padding for the content that SHOULD be inset (like lists)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                // Your Store List or content goes here
             }
         }
     }
 }
+
+
+
+
+
+
