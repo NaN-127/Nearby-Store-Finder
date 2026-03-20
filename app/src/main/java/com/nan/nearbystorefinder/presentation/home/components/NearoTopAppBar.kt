@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.nan.nearbystorefinder.R
 
 @Composable
-fun NearoTopAppBar() {
+fun NearoTopAppBar(location: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,7 +63,7 @@ fun NearoTopAppBar() {
                     letterSpacing = 0.5.sp
                 )
                 Text(
-                    text = "Lower Manhattan, NY",
+                    text = location,
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
@@ -92,5 +92,5 @@ fun NearoTopAppBar() {
 @Preview(showBackground = true, backgroundColor = 0xFF0B0B0F)
 @Composable
 fun NearoPrev() {
-    NearoTopAppBar()
+    NearoTopAppBar(location = "Mumbai")
 }

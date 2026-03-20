@@ -1,6 +1,9 @@
 package com.nan.nearbystorefinder.presentation.home.screen
 
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,13 +27,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import com.nan.nearbystorefinder.domain.model.Store
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import com.nan.nearbystorefinder.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
 import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
@@ -47,9 +53,32 @@ fun HomeScreen(
     val viewModel: HomeViewModel = koinViewModel()
     val state = viewModel.state
 
-    // Use a Box to layer the background behind the entire Scaffold
+    val context = LocalContext.current
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts .RequestMultiplePermissions()
+    ) {
+        permission ->
+        val granted = permission.values.all { it }
+
+        if(granted){
+            viewModel.fetchUserLocation()
+        }else{
+
+        }
+    }
+
+    val locationState = viewModel.userLocation
+    LaunchedEffect(Unit) {
+       locationPermissionLauncher.launch(
+           arrayOf(
+               android.Manifest.permission.ACCESS_FINE_LOCATION,
+               android.Manifest.permission.ACCESS_COARSE_LOCATION
+           )
+       )
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // 1. Background Image stays here, ignores Scaffold padding
         Image(
             painter = painterResource(id = R.drawable.map_background),
             contentDescription = null,
@@ -57,7 +86,6 @@ fun HomeScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 2. Gradient Overlay
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,23 +100,24 @@ fun HomeScreen(
                 )
         )
 
-        // 3. The UI Layer
         Scaffold(
-            containerColor = Color.Transparent, // Keeps the background visible
+            containerColor = Color.Transparent,
             topBar = {
-                NearoTopAppBar()
+                NearoTopAppBar(
+                    location = locationState?.address.toString()
+                )
             },
             bottomBar = {
                 NearoBottomBar(navController)
             }
         ) { paddingValues ->
-            // Only use padding for the content that SHOULD be inset (like lists)
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // Your Store List or content goes here
+
+
             }
         }
     }
