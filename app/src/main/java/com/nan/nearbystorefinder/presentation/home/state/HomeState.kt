@@ -7,4 +7,5 @@ import com.nan.nearbystorefinder.domain.model.UserLocation
 data class HomeState (
     val stores: List<Store> = emptyList(),
     val isLoading: Boolean = false,
+    val selectedCategory: String? = "FOOD"
 )

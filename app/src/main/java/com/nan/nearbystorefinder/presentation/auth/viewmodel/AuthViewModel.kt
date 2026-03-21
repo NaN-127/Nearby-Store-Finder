@@ -1,91 +1,45 @@
 package com.nan.nearbystorefinder.presentation.auth.viewmodel
 
-import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nan.nearbystorefinder.presentation.auth.state.AuthState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.nan.nearbystorefinder.presentation.auth.state.AuthState
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class AuthViewModel(
-    private val auth: FirebaseAuth
-) : ViewModel() {
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+): ViewModel() {
 
     var state by mutableStateOf(AuthState(user = auth.currentUser))
         private set
 
-    init {
-        auth.addAuthStateListener {
-            state = state.copy(user = it.currentUser, isAuthReady = true)
-        }
-    }
-
     fun onEmailChange(email: String){
-        state = state.copy(email = email, emailError = null)
+        state = state.copy(email = email)
     }
 
     fun onFullNameChange(fullName: String){
-        state = state.copy(fullName = fullName, fullNameError = null)
+        state = state.copy(fullName = fullName)
     }
 
     fun onPasswordChange(password: String){
-        state = state.copy(password = password, passwordError = null)
+        state = state.copy(password = password)
     }
 
-    private fun validateLogin(): Boolean {
-        var isValid = true
-        if (state.email.isBlank()) {
-            state = state.copy(emailError = "Email cannot be empty")
-            isValid = false
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
-            state = state.copy(emailError = "Please enter a valid email address")
-            isValid = false
-        }
-
-        if (state.password.isBlank()) {
-            state = state.copy(passwordError = "Password cannot be empty")
-            isValid = false
-        }
-
-        return isValid
-    }
-
-    private fun validateSignUp(): Boolean {
-        var isValid = true
-        if (state.fullName.isBlank()) {
-            state = state.copy(fullNameError = "Full Name cannot be empty")
-            isValid = false
-        }
-
-        if (state.email.isBlank()) {
-            state = state.copy(emailError = "Email cannot be empty")
-            isValid = false
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
-            state = state.copy(emailError = "Please enter a valid email address")
-            isValid = false
-        }
-
-        if (state.password.isBlank()) {
-            state = state.copy(passwordError = "Password cannot be empty")
-            isValid = false
-        } else if (state.password.length < 6) {
-            state = state.copy(passwordError = "Password must be at least 6 characters")
-            isValid = false
-        }
-
-        return isValid
+    fun logout() {
+        auth.signOut()
+        state = AuthState(user = null)
     }
 
     fun login(){
-        if (!validateLogin()) return
-        
         viewModelScope.launch {
-            state = state.copy(isLoading = true, error = null)
+            state = state.copy(isLoading = true, error = null, isAuthReady = false)
             try {
                 val result = auth.signInWithEmailAndPassword(
                     state.email,
@@ -94,38 +48,51 @@ class AuthViewModel(
 
                 state = state.copy(
                     isLoading = false,
-                    user = result.user
+                    user = result.user,
+                    isAuthReady = true
                 )
 
-            } catch (e: Exception){
+            }catch (e: Exception){
                 state = state.copy(
                     isLoading = false,
-                    error = e.message
+                    error = e.message,
+                    isAuthReady = false
                 )
             }
         }
+
     }
 
     fun signUp() {
-        if (!validateSignUp()) return
-        
         viewModelScope.launch {
-            state = state.copy(isLoading = true, error = null)
+            state = state.copy(isLoading = true, error = null, isAuthReady = false)
             try {
                 val result = auth.createUserWithEmailAndPassword(
                     state.email,
                     state.password
                 ).await()
 
+                result.user?.let { user ->
+                    val userData = mapOf(
+                        "uid" to user.uid,
+                        "email" to state.email,
+                        "fullName" to state.fullName,
+                        "profilePhotoUrl" to null
+                    )
+                    firestore.collection("users").document(user.uid).set(userData).await()
+                }
+
                 state = state.copy(
                     isLoading = false,
-                    user = result.user
+                    user = result.user,
+                    isAuthReady = true
                 )
 
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
-                    error = e.message
+                    error = e.message,
+                    isAuthReady = false
                 )
             }
         }
@@ -133,7 +100,7 @@ class AuthViewModel(
 
     fun signInWithGoogle(idToken: String){
         viewModelScope.launch {
-            state = state.copy(isLoading = true, error = null)
+            state = state.copy(isLoading = true, error = null, isAuthReady = false)
 
             try{
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -141,22 +108,39 @@ class AuthViewModel(
                 val result = auth.signInWithCredential(credential).await()
 
                 state = state.copy(
-                    isLoading = false,
                     user = result.user
                 )
 
-            } catch (e: Exception){
+                result.user?.let { user ->
+                    val userDoc = firestore.collection("users").document(user.uid).get().await()
+                    if (!userDoc.exists()) {
+                        val userData = mapOf(
+                            "uid" to user.uid,
+                            "email" to user.email,
+                            "fullName" to (user.displayName ?: ""),
+                            "profilePhotoUrl" to (user.photoUrl?.toString())
+                        )
+                        firestore.collection("users").document(user.uid).set(userData).await()
+                    }
+                }
+
                 state = state.copy(
                     isLoading = false,
-                    error = e.localizedMessage ?: e.message ?: "Google Sign-In failed"
+                    user = result.user,
+                    isAuthReady = true
+                )
+
+
+            }catch (e: Exception){
+                state = state.copy(
+                    isLoading = false,
+                    error = e.message,
+                    isAuthReady = false
                 )
             }
         }
     }
-
-
-    fun logout() {
-        auth.signOut()
-        state = state.copy(user = null)
-    }
 }
+
+
+

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.nan.nearbystorefinder.R
 import com.nan.nearbystorefinder.core.auth.GoogleAuthClient
 import com.nan.nearbystorefinder.presentation.auth.components.CustomInputField
 import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
@@ -97,7 +98,7 @@ fun SignUpScreen(
     NearoTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = Color(0xFF0B0B0F)
         ) {
             Column(
                 modifier = Modifier
@@ -173,9 +174,9 @@ fun SignUpScreen(
                     shape = RoundedCornerShape(16.dp),
                     isError = state.passwordError != null,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color(0xFF1A1A1E),
+                        unfocusedContainerColor = Color(0xFF1A1A1E),
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent,
                         cursorColor = Color.White,
                         focusedTextColor = Color.White,
@@ -249,17 +250,26 @@ fun SignUpScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(28.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.DarkGray),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF333336)),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                     enabled = !state.isLoading
                 ) {
-                    if (state.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_google),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(20.dp)
                         )
-                    } else {
-                        Text("Sign up with Google")
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Continue with Google",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        )
                     }
                 }
 
@@ -283,14 +293,4 @@ fun SignUpScreen(
             }
         }
     }
-}
-
-
-@Preview(
-    showBackground = true
-)
-@Composable
-fun SignUpPreview (
-
-) {SignUpScreen(onLoginClick = {}, onSignUpSuccess ={})
 }

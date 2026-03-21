@@ -14,3 +14,23 @@
 .cxx
 local.properties
 app/google-services.json
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+
+# Example tests
+app/src/test/java/com/nan/nearbystorefinder/ExampleUnitTest.kt
+app/src/androidTest/java/com/nan/nearbystorefinder/ExampleInstrumentedTest.kt
+
+# Common Android/IntelliJ
+.idea/
+*.iws
+out/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.ap_
+*.dex
+*.class
