@@ -32,6 +32,9 @@ import org.koin.androidx.compose.koinViewModel
 fun NearoTopAppBar(location: String) {
     val profileViewModel: ProfileViewModel = koinViewModel()
     val profileImageUri by profileViewModel.profileImageUri.collectAsState()
+    val fullName by profileViewModel.fullName.collectAsState()
+
+    val initial = fullName?.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
 
     Row(
         modifier = Modifier
@@ -85,7 +88,7 @@ fun NearoTopAppBar(location: String) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFFCC80)),
+                    .background(Color(0xFF8A7CFF)),
                 contentAlignment = Alignment.Center
             ) {
                 if (profileImageUri != null) {
@@ -96,10 +99,11 @@ fun NearoTopAppBar(location: String) {
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                        contentDescription = null,
-                        tint = Color.Black.copy(alpha = 0.6f)
+                    Text(
+                        text = initial,
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
