@@ -48,5 +48,6 @@ fun Store.toStoreEntity(): StoreEntity {
         address = address,
         latitude = latitude,
         longitude = longitude
+
     )
 }

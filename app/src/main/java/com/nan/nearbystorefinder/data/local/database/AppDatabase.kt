@@ -6,6 +6,5 @@ import com.nan.nearbystorefinder.data.local.dao.FavoriteDao
 import com.nan.nearbystorefinder.data.local.entity.StoreEntity
 
 @Database(entities = [StoreEntity::class], version = 1)
-abstract class AppDatabase : RoomDatabase() {
-    abstract val favoriteDao: FavoriteDao
+abstract class AppDatabase : RoomDatabase() { abstract val favoriteDao: FavoriteDao
 }

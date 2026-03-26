@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface FavoriteDao {
     @Query("SELECT * FROM favorites")
     fun getAllFavorites(): Flow<List<StoreEntity>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFavorite(store: StoreEntity)
 
