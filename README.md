@@ -29,15 +29,9 @@
 ## 📸 Screenshots
 
 <p align="center">
-  <img width="442" height="797" alt="image" src="https://github.com/user-attachments/assets/cc109191-2d60-4c50-9556-1da5fdabe47b" />
-<img width="445" height="798" alt="image" src="https://github.com/user-attachments/assets/af1279cd-06ce-445d-b32b-2b693faee9fb" />
-<img width="439" height="750" alt="image" src="https://github.com/user-attachments/assets/e500b78b-350b-4807-a938-9ee69b53161b" />
-<img width="420" height="758" alt="image" src="https://github.com/user-attachments/assets/683dca73-e1a7-4c63-9165-dae2e3a7f64b" />
-<img width="422" height="752" alt="image" src="https://github.com/user-attachments/assets/c1f8bde2-41ec-411f-a7a9-b80bd8834288" />
-
-
-
-  
-  
-  <img src="assets/screenshots/map.png" width="250"/>
+  <img src="https://github.com/user-attachments/assets/cc109191-2d60-4c50-9556-1da5fdabe47b" width="220" />
+  <img src="https://github.com/user-attachments/assets/af1279cd-06ce-445d-b32b-2b693faee9fb" width="220" />
+  <img src="https://github.com/user-attachments/assets/e500b78b-350b-4807-a938-9ee69b53161b" width="220" />
+  <img src="https://github.com/user-attachments/assets/683dca73-e1a7-4c63-9165-dae2e3a7f64b" width="220" />
+  <img src="https://github.com/user-attachments/assets/c1f8bde2-41ec-411f-a7a9-b80bd8834288" width="220" />
 </p>
