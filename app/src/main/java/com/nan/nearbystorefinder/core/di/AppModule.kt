@@ -1,10 +1,11 @@
 package com.nan.nearbystorefinder.core.di
 
+import androidx.room.Room
 import com.nan.nearbystorefinder.core.auth.GoogleAuthClient
 import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.nan.nearbystorefinder.core.location.LocationClient
+import com.nan.nearbystorefinder.data.local.database.AppDatabase
 import com.nan.nearbystorefinder.data.remote.repository.GeoapifyStoreRepository
 import com.nan.nearbystorefinder.domain.repository.StoreRepository
 import com.nan.nearbystorefinder.domain.repository.FavoriteRepository
@@ -35,27 +36,32 @@ val appModule = module {
         }
     }
 
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "nearo_db"
+        ).build()
+    }
+
+    single { get<AppDatabase>().favoriteDao }
+
     single<StoreRepository> {
         GeoapifyStoreRepository(get(), BuildConfig.GEOAPIFY_API_KEY)
     }
 
     single {
-        FavoriteRepository(get(), get())
+        FavoriteRepository(get())
     }
 
     single {
-        ProfileRepository(get(), get(), get())
+        ProfileRepository(get(), androidContext())
     }
 
     single {
         FirebaseAuth.getInstance()
     }
-    single {
-        FirebaseFirestore.getInstance()
-    }
-    single {
-        com.google.firebase.storage.FirebaseStorage.getInstance()
-    }
+    
     single {
         GoogleAuthClient(get())
     }
@@ -63,15 +69,14 @@ val appModule = module {
     single {
         LocationClient(androidContext())
     }
+    
     viewModel {
-        AuthViewModel(get(), get(), get())
+        AuthViewModel(get(), get(), androidContext())
     }
 
     viewModel{
         HomeViewModel(get(), get(), get())
     }
-
-
 
     viewModel {
         FavoriteViewModel(get())

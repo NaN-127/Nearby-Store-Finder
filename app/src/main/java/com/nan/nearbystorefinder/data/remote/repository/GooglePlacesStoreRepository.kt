@@ -9,7 +9,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-class GooglePlacesStoreRepository(
+/*class GooglePlacesStoreRepository(
     private val client: HttpClient,
     private val apiKey: String
 ) : StoreRepository {
@@ -82,4 +82,4 @@ class GooglePlacesStoreRepository(
             longitude = geometry.location.lng
         )
     }
-}
+}*/

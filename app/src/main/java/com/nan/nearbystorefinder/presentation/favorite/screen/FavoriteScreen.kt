@@ -28,7 +28,6 @@ import com.nan.nearbystorefinder.R
 import com.nan.nearbystorefinder.domain.model.Store
 import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
 import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
-import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.nan.nearbystorefinder.presentation.favorite.viewmodel.FavoriteViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -73,49 +72,64 @@ fun FavoriteScreen(
                 NearoBottomBar(navController)
             }
         ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(bottom = 100.dp)
-            ) {
-                item {
-                    Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
-                        Text(
-                            text = "Favorites",
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "${state.favorites.size} saved stores",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
-                    }
-                }
-
-                if (state.favorites.isEmpty() && !state.isLoading) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 100.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No favorites yet",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
+            Box(modifier = Modifier.padding(paddingValues)) {
+                if (state.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFF8A7CFF))
                     }
                 } else {
-                    items(state.favorites, key = { it.id }) { store ->
-                        FavoriteStoreCard(
-                            store = store,
-                            onRemoveClick = { viewModel.removeFavorite(store) }
-                        )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
+                        item {
+                            Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                                Text(
+                                    text = "Favorites",
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "${state.favorites.size} saved stores",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                        if (state.favorites.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 100.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Icon(
+                                            imageVector = Icons.Default.FavoriteBorder,
+                                            contentDescription = null,
+                                            tint = Color.Gray,
+                                            modifier = Modifier.size(64.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "No favorites yet",
+                                            color = Color.Gray,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            items(state.favorites, key = { it.id }) { store ->
+                                FavoriteStoreCard(
+                                    store = store,
+                                    onRemoveClick = { viewModel.removeFavorite(store) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -167,7 +181,7 @@ fun FavoriteStoreCard(
                             imageVector = Icons.Default.Favorite,
                             null,
                             Modifier.size(20.dp),
-                            Color(0xFF8A7CFF)
+                            Color.Red
                         )
                     }
                 }

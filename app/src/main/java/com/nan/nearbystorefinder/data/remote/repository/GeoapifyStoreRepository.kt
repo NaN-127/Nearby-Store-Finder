@@ -1,6 +1,5 @@
 package com.nan.nearbystorefinder.data.remote.repository
 
-import android.util.Log.e
 import com.nan.nearbystorefinder.data.remote.dto.GeoapifyResponse
 import com.nan.nearbystorefinder.domain.model.Store
 import com.nan.nearbystorefinder.domain.repository.StoreRepository
@@ -8,7 +7,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import kotlin.math.roundToInt
 
 class GeoapifyStoreRepository(
     private val client: HttpClient,
@@ -42,10 +40,10 @@ class GeoapifyStoreRepository(
                 Store(
                     id = prop.placeId,
                     name = prop.name ?: prop.street ?: "Nearby Store",
-                    rating = (38 + (0..12).random()).toFloat() / 10f,
+                    rating = (38 + (0..12).random()).toDouble() / 10.0,
                     userRatingsTotal = (50..1500).random(),
-                    distance = distanceInKm.toFloat(),
-                    category = prop.categories?.firstOrNull()?.split(".")?.lastOrNull()?.replace("_", " ")?.capitalize() ?: "Store",
+                    distance = distanceInKm,
+                    category = prop.categories?.firstOrNull()?.split(".")?.lastOrNull()?.replace("_", " ")?.replaceFirstChar { it.uppercase() } ?: "Store",
                     imageUrl = getHighQualityPlaceholderImage(prop.categories?.firstOrNull() ?: "", category ?: ""),
                     isOpen = true,
                     address = prop.addressLine1 ?: prop.addressLine2 ?: "",
@@ -54,7 +52,6 @@ class GeoapifyStoreRepository(
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             emptyList()
         }
     }

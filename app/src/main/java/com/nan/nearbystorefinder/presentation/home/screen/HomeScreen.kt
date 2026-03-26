@@ -1,50 +1,32 @@
 package com.nan.nearbystorefinder.presentation.home.screen
 
-
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import com.nan.nearbystorefinder.domain.model.Store
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import com.nan.nearbystorefinder.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
-import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
-
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import coil.compose.AsyncImage
+import com.nan.nearbystorefinder.R
+import com.nan.nearbystorefinder.domain.model.Store
 import com.nan.nearbystorefinder.presentation.home.components.CategorySection
 import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
 import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
@@ -59,7 +41,6 @@ fun HomeScreen(
     val viewModel: HomeViewModel = koinViewModel()
     val state = viewModel.state
     val favoriteIds by viewModel.favoriteStoreIds.collectAsState()
-    val context = LocalContext.current
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -140,7 +121,9 @@ fun HomeScreen(
                             StoreCard(
                                 store = store,
                                 isFavorite = favoriteIds.contains(store.id),
-                                onFavoriteToggle = { viewModel.toggleFavorite(store) },
+                                onFavoriteToggle = { 
+                                    viewModel.toggleFavorite(store) 
+                                },
                                 onClick = {
                                     // Navigate to details if needed
                                 }
@@ -160,7 +143,6 @@ fun StoreCard(
     onFavoriteToggle: () -> Unit,
     onClick: () -> Unit
 ) {
-    android.util.Log.d("HomeScreen", "Rendering StoreCard for ${store.name}, isFavorite: $isFavorite")
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,24 +156,32 @@ fun StoreCard(
                     model = store.imageUrl,
                     contentDescription = store.name,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                    error = painterResource(id = android.R.drawable.ic_menu_gallery)
                 )
                 
                 Surface(
                     modifier = Modifier
                         .padding(12.dp)
                         .align(Alignment.TopEnd)
-                        .size(36.dp)
-                        .clickable { onFavoriteToggle() },
+                        .size(36.dp),
                     shape = RoundedCornerShape(10.dp),
                     color = Color.Black.copy(alpha = 0.5f)
                 ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.Star,
-                        contentDescription = "Favorite",
-                        tint = if (isFavorite) Color.Yellow else Color.White,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { onFavoriteToggle() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = if (isFavorite) Color.Red else Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
@@ -217,7 +207,7 @@ fun StoreCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = store.rating.toString(),
+                            text = String.format("%.1f", store.rating),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White
                         )
@@ -244,9 +234,3 @@ fun StoreCard(
         }
     }
 }
-
-
-
-
-
-

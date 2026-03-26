@@ -94,8 +94,7 @@ fun NearoTopAppBar(location: String, onLogout: () -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF8A7CFF))
-                    .clickable { onLogout() },
+                    .background(Color(0xFF8A7CFF)),
                 contentAlignment = Alignment.Center
             ) {
                 if (profileImageUri != null) {

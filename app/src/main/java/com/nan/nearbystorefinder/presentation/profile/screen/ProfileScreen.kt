@@ -1,9 +1,6 @@
 package com.nan.nearbystorefinder.presentation.profile.screen
 
 import android.net.Uri
-import android.app.DownloadManager
-import android.content.Context
-import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -18,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,7 +34,6 @@ import com.nan.nearbystorefinder.R
 import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
 import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
-import com.nan.nearbystorefinder.presentation.navigation.Screen
 import com.nan.nearbystorefinder.presentation.profile.viewmodel.ProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -50,7 +45,6 @@ fun ProfileScreen(
 ) {
     val profileViewModel: ProfileViewModel = koinViewModel()
     val authState = authViewModel.state
-    val context = androidx.compose.ui.platform.LocalContext.current
     val user = authState.user
     val profileImageUri by profileViewModel.profileImageUri.collectAsState()
     val fullName by profileViewModel.fullName.collectAsState()
@@ -61,12 +55,10 @@ fun ProfileScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        android.util.Log.d("ProfileScreen", "Image selected: $uri")
         if (uri != null) {
             profileViewModel.updateProfileImage(uri)
         }
     }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -125,7 +117,6 @@ fun ProfileScreen(
                                 )
                                 .padding(6.dp)
                                 .clickable {
-                                    android.util.Log.d("ProfileScreen", "Profile image clicked")
                                     galleryLauncher.launch("image/*")
                                 },
                             shape = CircleShape,
@@ -136,16 +127,7 @@ fun ProfileScreen(
                                     model = profileImageUri ?: user?.photoUrl,
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize().clip(CircleShape),
-                                    contentScale = ContentScale.Crop,
-                                    onError = { error ->
-                                        android.util.Log.e("ProfileScreen", "Coil Error: ${error.result.throwable.message}")
-                                    },
-                                    onLoading = {
-                                        android.util.Log.d("ProfileScreen", "Coil Loading: ${profileImageUri ?: user?.photoUrl}")
-                                    },
-                                    onSuccess = {
-                                        android.util.Log.d("ProfileScreen", "Coil Success: ${profileImageUri ?: user?.photoUrl}")
-                                    }
+                                    contentScale = ContentScale.Crop
                                 )
                             } else {
                                 Box(
@@ -200,26 +182,6 @@ fun ProfileScreen(
 
                 item {
                     ProfileSectionHeader("GENERAL")
-                    ProfileMenuItem(
-                        title = "Download Resume",
-                        subtitle = "Get a copy of my professional resume",
-                        icon = Icons.Default.FileDownload,
-                        iconBg = Color(0xFF4CAF50).copy(0.2f),
-                        iconTint = Color(0xFF4CAF50),
-                        onClick = {
-                            val url = "https://example.com/resume.pdf"
-                            val request = DownloadManager.Request(Uri.parse(url))
-                                .setTitle("Resume Download")
-                                .setDescription("Downloading resume...")
-                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "resume.pdf")
-                                .setAllowedOverMetered(true)
-                                .setAllowedOverRoaming(true)
-
-                            val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                            downloadManager.enqueue(request)
-                        }
-                    )
                     ProfileMenuItem("Help & Support", "FAQs and direct assistance", Icons.Default.Help, Color.Gray.copy(0.2f), Color.White)
                     ProfileMenuItem(
                         title = "Logout",

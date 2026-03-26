@@ -1,5 +1,6 @@
 package com.nan.nearbystorefinder.presentation.auth.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,16 +9,17 @@ import androidx.lifecycle.viewModelScope
 import com.nan.nearbystorefinder.presentation.auth.state.AuthState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
 import com.nan.nearbystorefinder.core.auth.GoogleAuthClient
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class AuthViewModel(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore,
-    private val googleAuthClient: GoogleAuthClient
+    private val googleAuthClient: GoogleAuthClient,
+    private val context: Context
 ): ViewModel() {
+
+    private val sharedPrefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
 
     var state by mutableStateOf(AuthState(user = auth.currentUser))
         private set
@@ -69,7 +71,6 @@ class AuthViewModel(
                 )
             }
         }
-
     }
 
     fun signUp() {
@@ -82,25 +83,9 @@ class AuthViewModel(
                 ).await()
 
                 result.user?.let { user ->
-                    val userData = mutableMapOf(
-                        "uid" to user.uid,
-                        "email" to state.email,
-                        "fullName" to state.fullName,
-                        "profilePhotoUrl" to null
-                    )
-                    
-                    var retryCount = 0
-                    var success = false
-                    while (retryCount < 3 && !success) {
-                        try {
-                            firestore.collection("users").document(user.uid).set(userData).await()
-                            success = true
-                        } catch (e: Exception) {
-                            retryCount++
-                            if (retryCount >= 3) throw e
-                            kotlinx.coroutines.delay(500)
-                        }
-                    }
+                    sharedPrefs.edit()
+                        .putString("full_name_${user.uid}", state.fullName)
+                        .apply()
                 }
 
                 state = state.copy(
@@ -125,35 +110,14 @@ class AuthViewModel(
 
             try{
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
-
                 val result = auth.signInWithCredential(credential).await()
 
-                state = state.copy(
-                    user = result.user
-                )
-
                 result.user?.let { user ->
-                    val userDoc = firestore.collection("users").document(user.uid).get().await()
-                    if (!userDoc.exists()) {
-                        val userData = mutableMapOf(
-                            "uid" to user.uid,
-                            "email" to user.email,
-                            "fullName" to (user.displayName ?: ""),
-                            "profilePhotoUrl" to (user.photoUrl?.toString())
-                        )
-                        
-                        var retryCount = 0
-                        var success = false
-                        while (retryCount < 3 && !success) {
-                            try {
-                                firestore.collection("users").document(user.uid).set(userData).await()
-                                success = true
-                            } catch (e: Exception) {
-                                retryCount++
-                                if (retryCount >= 3) throw e
-                                kotlinx.coroutines.delay(500)
-                            }
-                        }
+                    if (sharedPrefs.getString("full_name_${user.uid}", null) == null) {
+                        sharedPrefs.edit()
+                            .putString("full_name_${user.uid}", user.displayName ?: "")
+                            .putString("profile_photo_${user.uid}", user.photoUrl?.toString())
+                            .apply()
                     }
                 }
 
@@ -162,8 +126,6 @@ class AuthViewModel(
                     user = result.user,
                     isAuthReady = true
                 )
-
-
             }catch (e: Exception){
                 state = state.copy(
                     isLoading = false,
@@ -174,6 +136,3 @@ class AuthViewModel(
         }
     }
 }
-
-
-

@@ -1,13 +1,14 @@
 package com.nan.nearbystorefinder.domain.model
 
+import kotlinx.serialization.Serializable
 
-
+@Serializable
 data class Store(
     val id: String = "",
     val name: String = "",
-    val rating: Float = 0f,
+    val rating: Double = 0.0,
     val userRatingsTotal: Int = 0,
-    val distance: Float = 0f,
+    val distance: Double = 0.0,
     val category: String = "",
     val imageUrl: String? = null,
     val isOpen: Boolean = false,
