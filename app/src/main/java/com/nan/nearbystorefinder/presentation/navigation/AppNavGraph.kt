@@ -2,6 +2,7 @@ package com.nan.nearbystorefinder.presentation.navigation
 
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,13 +14,25 @@ import com.nan.nearbystorefinder.presentation.home.screen.HomeScreen
 import com.nan.nearbystorefinder.presentation.profile.screen.ProfileScreen
 import com.nan.nearbystorefinder.presentation.favorite.screen.FavoriteScreen
 import com.nan.nearbystorefinder.presentation.splash.SplashScreen
+import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun AppNavGraph(navController: NavHostController){
 
-    val auth = FirebaseAuth.getInstance()
-    val isLoggedIn = auth.currentUser != null
+    val authViewModel: AuthViewModel = koinViewModel()
+    val authState = authViewModel.state
+
+    LaunchedEffect(authState.user) {
+        if (authState.user == null) {
+            if (navController.currentDestination?.route != Screen.Login.route) {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(0)
+                }
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -28,7 +41,7 @@ fun AppNavGraph(navController: NavHostController){
         composable(route = Screen.Splash.route){
             SplashScreen(
                 onSplashFinished = {
-                    val nextScreen = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+                    val nextScreen = if (authState.user != null) Screen.Home.route else Screen.Login.route
                     navController.navigate(nextScreen){
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
@@ -40,24 +53,29 @@ fun AppNavGraph(navController: NavHostController){
             HomeScreen(
                 navController = navController,
                 onLogout = {
-                    auth.signOut()
-                    navController.navigate(Screen.Login.route){
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
+                    authViewModel.logout()
                 }
             )
         }
 
         composable(route = Screen.Favorite.route){
-            FavoriteScreen(navController = navController)
+            FavoriteScreen(
+                navController = navController,
+                onLogout = { authViewModel.logout() }
+            )
         }
 
         composable(route = Screen.Profile.route){
-            ProfileScreen(navController = navController)
+            ProfileScreen(
+                navController = navController,
+                authViewModel = authViewModel,
+                onLogout = { authViewModel.logout() }
+            )
         }
 
         composable(route = Screen.Login.route){
             LoginScreen(
+                authViewModel = authViewModel,
                 onSignUpClick = {
                     navController.navigate(Screen.SignUp.route)
                 },
@@ -71,6 +89,7 @@ fun AppNavGraph(navController: NavHostController){
 
         composable(route = Screen.SignUp.route){
             SignUpScreen(
+                authViewModel = authViewModel,
                 onLoginClick = {
                     navController.navigate(Screen.Login.route)
                 },

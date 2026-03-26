@@ -64,7 +64,7 @@ val appModule = module {
         LocationClient(androidContext())
     }
     viewModel {
-        AuthViewModel(get(), get())
+        AuthViewModel(get(), get(), get())
     }
 
     viewModel{

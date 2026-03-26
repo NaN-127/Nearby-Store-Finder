@@ -106,7 +106,8 @@ fun HomeScreen(
             containerColor = Color.Transparent,
             topBar = {
                 NearoTopAppBar(
-                    location = locationState?.address ?: "Finding location..."
+                    location = locationState?.address ?: "Finding location...",
+                    onLogout = onLogout
                 )
             },
             bottomBar = {

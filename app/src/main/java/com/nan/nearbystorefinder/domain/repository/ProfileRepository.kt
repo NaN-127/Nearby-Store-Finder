@@ -18,8 +18,12 @@ class ProfileRepository(
     private val _fullName = MutableStateFlow<String?>(null)
     val fullName = _fullName.asStateFlow()
 
+    private val _email = MutableStateFlow<String?>(null)
+    val email = _email.asStateFlow()
+
     suspend fun loadUserProfile() {
         val currentUser = auth.currentUser ?: return
+        _email.value = currentUser.email
         try {
             val document = firestore.collection("users").document(currentUser.uid).get().await()
             if (document.exists()) {

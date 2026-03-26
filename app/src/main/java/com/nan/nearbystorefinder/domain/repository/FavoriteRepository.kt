@@ -17,7 +17,7 @@ class FavoriteRepository(
         if (currentUser == null) {
             android.util.Log.e("FavoriteRepository", "User is null in callbackFlow")
             trySend(emptySet())
-            close()
+            awaitClose { }
             return@callbackFlow
         }
 

@@ -1,6 +1,9 @@
 package com.nan.nearbystorefinder.presentation.profile.screen
 
 import android.net.Uri
+import android.app.DownloadManager
+import android.content.Context
+import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -40,13 +43,20 @@ import com.nan.nearbystorefinder.presentation.profile.viewmodel.ProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController) {
-    val authViewModel: AuthViewModel = koinViewModel()
+fun ProfileScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    onLogout: () -> Unit
+) {
     val profileViewModel: ProfileViewModel = koinViewModel()
     val authState = authViewModel.state
+    val context = androidx.compose.ui.platform.LocalContext.current
     val user = authState.user
     val profileImageUri by profileViewModel.profileImageUri.collectAsState()
     val fullName by profileViewModel.fullName.collectAsState()
+    val email by profileViewModel.email.collectAsState()
+
+    val initial = (email ?: user?.email)?.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -57,13 +67,6 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
-    LaunchedEffect(authState.user) {
-        if (authState.user == null) {
-            navController.navigate(Screen.Login.route) {
-                popUpTo(0)
-            }
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -89,7 +92,10 @@ fun ProfileScreen(navController: NavController) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                NearoTopAppBar(location = "Profile")
+                NearoTopAppBar(
+                    location = "Profile",
+                    onLogout = onLogout
+                )
             },
             bottomBar = {
                 NearoBottomBar(navController)
@@ -142,12 +148,19 @@ fun ProfileScreen(navController: NavController) {
                                     }
                                 )
                             } else {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.padding(24.dp)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(0xFF8A7CFF)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = initial,
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                         Surface(
@@ -187,6 +200,26 @@ fun ProfileScreen(navController: NavController) {
 
                 item {
                     ProfileSectionHeader("GENERAL")
+                    ProfileMenuItem(
+                        title = "Download Resume",
+                        subtitle = "Get a copy of my professional resume",
+                        icon = Icons.Default.FileDownload,
+                        iconBg = Color(0xFF4CAF50).copy(0.2f),
+                        iconTint = Color(0xFF4CAF50),
+                        onClick = {
+                            val url = "https://example.com/resume.pdf"
+                            val request = DownloadManager.Request(Uri.parse(url))
+                                .setTitle("Resume Download")
+                                .setDescription("Downloading resume...")
+                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "resume.pdf")
+                                .setAllowedOverMetered(true)
+                                .setAllowedOverRoaming(true)
+
+                            val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                            downloadManager.enqueue(request)
+                        }
+                    )
                     ProfileMenuItem("Help & Support", "FAQs and direct assistance", Icons.Default.Help, Color.Gray.copy(0.2f), Color.White)
                     ProfileMenuItem(
                         title = "Logout",
@@ -194,9 +227,7 @@ fun ProfileScreen(navController: NavController) {
                         icon = Icons.Default.Logout,
                         iconBg = Color(0xFFFF5252).copy(0.2f),
                         iconTint = Color(0xFFFF5252),
-                        onClick = {
-                            authViewModel.logout()
-                        }
+                        onClick = onLogout
                     )
                     Spacer(Modifier.height(32.dp))
                 }

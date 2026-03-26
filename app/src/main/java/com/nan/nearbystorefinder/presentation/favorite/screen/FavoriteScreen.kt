@@ -28,11 +28,15 @@ import com.nan.nearbystorefinder.R
 import com.nan.nearbystorefinder.domain.model.Store
 import com.nan.nearbystorefinder.presentation.home.components.NearoBottomBar
 import com.nan.nearbystorefinder.presentation.home.components.NearoTopAppBar
+import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.nan.nearbystorefinder.presentation.favorite.viewmodel.FavoriteViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun FavoriteScreen(navController: NavController) {
+fun FavoriteScreen(
+    navController: NavController,
+    onLogout: () -> Unit
+) {
     val viewModel: FavoriteViewModel = koinViewModel()
     val state = viewModel.state
 
@@ -60,7 +64,10 @@ fun FavoriteScreen(navController: NavController) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                NearoTopAppBar(location = "Favorites")
+                NearoTopAppBar(
+                    location = "Favorites",
+                    onLogout = onLogout
+                )
             },
             bottomBar = {
                 NearoBottomBar(navController)

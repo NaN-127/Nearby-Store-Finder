@@ -43,23 +43,23 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SignUpScreen(
+    authViewModel: AuthViewModel,
     onLoginClick: () -> Unit,
     onSignUpSuccess: () -> Unit
 ) {
 
-
     val contextForToast = LocalContext.current
-    val viewModel: AuthViewModel = koinViewModel()
-    val state = viewModel.state
+    val state = authViewModel.state
 
     val googleAuthClient: GoogleAuthClient = koinInject()
 
     LaunchedEffect(state.user, state.isAuthReady, state.error) {
-        if (state.isAuthReady && state.user != null) {
+        if (state.user != null) {
             onSignUpSuccess()
         }
         if (state.error != null) {
             android.widget.Toast.makeText(contextForToast, state.error, android.widget.Toast.LENGTH_LONG).show()
+            authViewModel.clearError()
         }
     }
 
@@ -77,7 +77,7 @@ fun SignUpScreen(
                 val idToken = account?.idToken
 
                 if(idToken != null){
-                    viewModel.signInWithGoogle(idToken = idToken)
+                    authViewModel.signInWithGoogle(idToken = idToken)
                 } else {
                     android.widget.Toast.makeText(contextForToast, "Google Sign-In: ID Token is null", android.widget.Toast.LENGTH_LONG).show()
                 }
@@ -141,7 +141,7 @@ fun SignUpScreen(
 
                 CustomInputField(
                     value = state.fullName,
-                    onValueChange = viewModel::onFullNameChange,
+                    onValueChange = authViewModel::onFullNameChange,
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     focusManager = focusManager,
@@ -150,7 +150,7 @@ fun SignUpScreen(
 
                 CustomInputField(
                     value = state.email,
-                    onValueChange = viewModel::onEmailChange,
+                    onValueChange = authViewModel::onEmailChange,
                     label = "Email",
                     placeholder = "Enter your email address",
                     keyboardType = KeyboardType.Email,
@@ -168,7 +168,7 @@ fun SignUpScreen(
                 )
                 OutlinedTextField(
                     value = state.password,
-                    onValueChange = viewModel::onPasswordChange,
+                    onValueChange = authViewModel::onPasswordChange,
                     placeholder = { Text("Create a password", color = Color.Gray) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -209,7 +209,7 @@ fun SignUpScreen(
 
                 Button(
                     onClick = {
-                        viewModel.signUp()
+                        authViewModel.signUp()
                     },
                     modifier = Modifier
                         .fillMaxWidth()

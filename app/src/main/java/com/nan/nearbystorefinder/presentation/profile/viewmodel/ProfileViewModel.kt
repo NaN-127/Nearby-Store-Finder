@@ -25,6 +25,9 @@ class ProfileViewModel(
     val fullName: StateFlow<String?> = profileRepository.fullName
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val email: StateFlow<String?> = profileRepository.email
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     private val _favoritesCount = MutableStateFlow(0)
     val favoritesCount = _favoritesCount.asStateFlow()
 

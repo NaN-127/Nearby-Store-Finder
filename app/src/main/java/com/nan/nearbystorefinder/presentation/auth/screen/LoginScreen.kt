@@ -38,16 +38,15 @@ import org.koin.compose.koinInject
 
 @Composable
 fun LoginScreen(
+    authViewModel: AuthViewModel,
     onSignUpClick: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
-
-    val viewModel: AuthViewModel = koinViewModel()
-    val state = viewModel.state
+    val state = authViewModel.state
 
 
     LaunchedEffect(state.user, state.isAuthReady) {
-        if(state.isAuthReady && state.user != null){
+        if(state.user != null){
             onLoginSuccess()
         }
 
@@ -68,7 +67,7 @@ fun LoginScreen(
                 val idToken = account?.idToken
 
                 if(idToken != null){
-                    viewModel.signInWithGoogle(idToken)
+                    authViewModel.signInWithGoogle(idToken)
                 }
             }catch (e: ApiException){
                 e.printStackTrace()
@@ -77,6 +76,13 @@ fun LoginScreen(
     }
 
 
+
+    LaunchedEffect(state.error) {
+        if (state.error != null) {
+            android.widget.Toast.makeText(context, state.error, android.widget.Toast.LENGTH_LONG).show()
+            authViewModel.clearError()
+        }
+    }
 
     var passwordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -119,7 +125,7 @@ fun LoginScreen(
 
             CustomInputField(
                 value = state.email,
-                onValueChange = viewModel::onEmailChange,
+                onValueChange = authViewModel::onEmailChange,
                 label = "Email",
                 placeholder = "Enter your email address",
                 keyboardType = KeyboardType.Email,
@@ -137,7 +143,7 @@ fun LoginScreen(
 
             OutlinedTextField(
                 value = state.password,
-                onValueChange = viewModel::onPasswordChange,
+                onValueChange = authViewModel::onPasswordChange,
                 placeholder = { Text("Enter your password", color = Color.Gray) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -169,7 +175,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.login() },
+                onClick = { authViewModel.login() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

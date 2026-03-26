@@ -3,6 +3,7 @@ package com.nan.nearbystorefinder.presentation.home.components
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -25,16 +26,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.nan.nearbystorefinder.R
+import com.nan.nearbystorefinder.presentation.auth.viewmodel.AuthViewModel
 import com.nan.nearbystorefinder.presentation.profile.viewmodel.ProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun NearoTopAppBar(location: String) {
+fun NearoTopAppBar(location: String, onLogout: () -> Unit) {
+    val authViewModel: AuthViewModel = koinViewModel()
     val profileViewModel: ProfileViewModel = koinViewModel()
+    val authState = authViewModel.state
+    val user = authState.user
     val profileImageUri by profileViewModel.profileImageUri.collectAsState()
     val fullName by profileViewModel.fullName.collectAsState()
+    val email by profileViewModel.email.collectAsState()
 
-    val initial = fullName?.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
+    val initial = (email ?: user?.email)?.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
 
     Row(
         modifier = Modifier
@@ -88,7 +94,8 @@ fun NearoTopAppBar(location: String) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF8A7CFF)),
+                    .background(Color(0xFF8A7CFF))
+                    .clickable { onLogout() },
                 contentAlignment = Alignment.Center
             ) {
                 if (profileImageUri != null) {

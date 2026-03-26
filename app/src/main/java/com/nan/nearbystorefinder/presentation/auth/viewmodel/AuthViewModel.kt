@@ -9,12 +9,14 @@ import com.nan.nearbystorefinder.presentation.auth.state.AuthState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.nan.nearbystorefinder.core.auth.GoogleAuthClient
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class AuthViewModel(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val googleAuthClient: GoogleAuthClient
 ): ViewModel() {
 
     var state by mutableStateOf(AuthState(user = auth.currentUser))
@@ -33,8 +35,15 @@ class AuthViewModel(
     }
 
     fun logout() {
-        auth.signOut()
-        state = AuthState(user = null)
+        viewModelScope.launch {
+            auth.signOut()
+            googleAuthClient.signOut()
+            state = AuthState()
+        }
+    }
+
+    fun clearError() {
+        state = state.copy(error = null)
     }
 
     fun login(){
@@ -42,8 +51,8 @@ class AuthViewModel(
             state = state.copy(isLoading = true, error = null, isAuthReady = false)
             try {
                 val result = auth.signInWithEmailAndPassword(
-                    state.email,
-                    state.password
+                    state.email.trim(),
+                    state.password.trim()
                 ).await()
 
                 state = state.copy(
@@ -68,18 +77,30 @@ class AuthViewModel(
             state = state.copy(isLoading = true, error = null, isAuthReady = false)
             try {
                 val result = auth.createUserWithEmailAndPassword(
-                    state.email,
-                    state.password
+                    state.email.trim(),
+                    state.password.trim()
                 ).await()
 
                 result.user?.let { user ->
-                    val userData = mapOf(
+                    val userData = mutableMapOf(
                         "uid" to user.uid,
                         "email" to state.email,
                         "fullName" to state.fullName,
                         "profilePhotoUrl" to null
                     )
-                    firestore.collection("users").document(user.uid).set(userData).await()
+                    
+                    var retryCount = 0
+                    var success = false
+                    while (retryCount < 3 && !success) {
+                        try {
+                            firestore.collection("users").document(user.uid).set(userData).await()
+                            success = true
+                        } catch (e: Exception) {
+                            retryCount++
+                            if (retryCount >= 3) throw e
+                            kotlinx.coroutines.delay(500)
+                        }
+                    }
                 }
 
                 state = state.copy(
@@ -114,13 +135,25 @@ class AuthViewModel(
                 result.user?.let { user ->
                     val userDoc = firestore.collection("users").document(user.uid).get().await()
                     if (!userDoc.exists()) {
-                        val userData = mapOf(
+                        val userData = mutableMapOf(
                             "uid" to user.uid,
                             "email" to user.email,
                             "fullName" to (user.displayName ?: ""),
                             "profilePhotoUrl" to (user.photoUrl?.toString())
                         )
-                        firestore.collection("users").document(user.uid).set(userData).await()
+                        
+                        var retryCount = 0
+                        var success = false
+                        while (retryCount < 3 && !success) {
+                            try {
+                                firestore.collection("users").document(user.uid).set(userData).await()
+                                success = true
+                            } catch (e: Exception) {
+                                retryCount++
+                                if (retryCount >= 3) throw e
+                                kotlinx.coroutines.delay(500)
+                            }
+                        }
                     }
                 }
 
