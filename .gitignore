@@ -15,15 +15,6 @@
 local.properties
 app/google-services.json
 
-# JVM crash logs
-hs_err_pid*
-replay_pid*
-
-# Example tests
-app/src/test/java/com/nan/nearbystorefinder/ExampleUnitTest.kt
-app/src/androidTest/java/com/nan/nearbystorefinder/ExampleInstrumentedTest.kt
-
-# Common Android/IntelliJ
 .idea/
 *.iws
 out/
@@ -34,3 +25,29 @@ captures/
 *.ap_
 *.dex
 *.class
+bin/
+gen/
+obj/
+
+# Gradle
+.gradle/
+build/
+app/build/
+.kotlin/
+
+local.properties
+google-services.json
+app/google-services.json
+
+hs_err_pid*
+replay_pid*
+
+.DS_Store
+Thumbs.db
+
+*.user
+*.suo
+*.ipr
+*.iws
+
+*.log
