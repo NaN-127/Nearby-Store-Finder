@@ -1,39 +1,38 @@
+## 🚀 Technologies Used
 
-Nearby Store Finder
+### 🧑‍💻 Core
+* **Kotlin** – Primary programming language for Android development  
+* **Jetpack Compose** – Declarative UI toolkit for building modern Android interfaces  
 
-**Nearby Store Finder** is an Android app that helps you find stores and places near your current location. It is simple to use and has a clean and modern design.
+### 🔐 Authentication
+* **Firebase Authentication** – Secure user login and account management  
 
+### 🧩 Architecture & Dependency Management
+* **MVVM Architecture** – Ensures separation of concerns and scalable code structure  
+* **Koin** – Lightweight dependency injection framework  
 
-## Features
+### 🗄️ Local Database
+* **Room Database** – Local persistence layer for storing app data offline  
+* **DAO (Data Access Objects)** – Structured database queries and operations  
 
-* Find stores and places near you
-* Save your favorite places for later
-* Log in using email or Google
-* See store details like ratings and distance
-* Manage your profile and app settings
+### 🌍 Location & APIs
+* **Geoapify API** – Provides location services and place data  
 
+### ⚙️ Asynchronous & State Handling
+* **Kotlin Coroutines** – Handles background tasks such as API calls and database operations  
+* **ViewModel + Compose State** – Manages UI state in a lifecycle-aware way  
 
-## Requirements
+### 🎨 UI & Design
+* **Material 3** – Modern UI components and design system  
+* **Compose Navigation** – Handles in-app navigation between screens
 
-* Android phone or emulator
-* Internet connection
-* Location services turned on
+## 📸 Screenshots
 
+<p align="center">
+  <img width="442" height="797" alt="image" src="https://github.com/user-attachments/assets/cc109191-2d60-4c50-9556-1da5fdabe47b" />
+<img width="445" height="798" alt="image" src="https://github.com/user-attachments/assets/af1279cd-06ce-445d-b32b-2b693faee9fb" />
 
-## Technologies Used
-
-* **Kotlin** – Main programming language
-* **Jetpack Compose** – Used to build the app UI
-* **Firebase Authentication** – For login and user accounts
-* **Koin** – For managing dependencies
-* **Geoapify API** – For getting location and place data
-
----
-
-## Getting Started
-
-1. Download or clone the project
-2. Open it in Android Studio
-3. Run the app on your phone or emulator
-4. Create an account and start exploring nearby places
-
+  
+  
+  <img src="assets/screenshots/map.png" width="250"/>
+</p>
