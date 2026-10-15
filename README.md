@@ -7,17 +7,21 @@ A modern, high-performance Android application built with **Jetpack Compose** an
 ## 📸 App Preview & Screenshots
 
 <p align="center">
-  <img src="screenshots/01_login.png" width="220" alt="Login Screen" />
-  <img src="screenshots/02_signup.png" width="220" alt="Sign Up Screen" />
-  <img src="screenshots/03_home.png" width="220" alt="Home Screen" />
-  <img src="screenshots/04_category_restaurants.png" width="220" alt="Restaurants Category" />
+  <img src="screenshots/01_login.png" width="240" alt="Login Screen" />
+  <img src="screenshots/02_signup.png" width="240" alt="Sign Up Screen" />
+  <img src="screenshots/03_home.png" width="240" alt="Home Screen" />
 </p>
 
 <p align="center">
-  <img src="screenshots/05_search.png" width="220" alt="Search Screen" />
-  <img src="screenshots/06_place_detail.png" width="220" alt="Place Details Screen" />
-  <img src="screenshots/07_favorites.png" width="220" alt="Favorites Screen" />
-  <img src="screenshots/08_profile.png" width="220" alt="Profile Screen" />
+  <img src="screenshots/04_category_restaurants.png" width="240" alt="Restaurants Category" />
+  <img src="screenshots/05_search.png" width="240" alt="Search Screen" />
+  <img src="screenshots/06_place_detail.png" width="240" alt="Place Details Screen" />
+</p>
+
+<p align="center">
+  <img src="screenshots/07_map_directions.png" width="240" alt="Open in Map Directions" />
+  <img src="screenshots/08_favorites.png" width="240" alt="Favorites Screen" />
+  <img src="screenshots/09_profile.png" width="240" alt="Profile Screen" />
 </p>
 
 ### Screen Breakdown
@@ -29,8 +33,9 @@ A modern, high-performance Android application built with **Jetpack Compose** an
 | **04. Categorized View** | Quick category chips (Restaurants, Cafes, Grocery, Pharmacy) with server & local distance sorting. |
 | **05. Instant Search** | Debounced (350ms) text search biased around current GPS coordinates. |
 | **06. Place Details** | Rich store metadata: directions intent, phone dialer, opening hours, and clean website cards (`• Opens in browser`). |
-| **07. Offline Favorites** | Room-backed offline persistence for quick access to saved places. |
-| **08. Profile & Settings** | Account status, theme preferences, and guest session management. |
+| **07. Open in Map** | Turn-by-turn navigation directly in Google Maps with driving ETA, route previews, and place ID targeting. |
+| **08. Offline Favorites** | Room-backed offline persistence for quick access to saved places. |
+| **09. Profile & Settings** | Account status, theme preferences, and guest session management. |
 
 ---
 
