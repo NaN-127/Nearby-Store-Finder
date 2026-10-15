@@ -1,101 +1,74 @@
 package com.nan.nearbystorefinder.presentation.home.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Coffee
-import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.LocalGroceryStore
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.nan.nearbystorefinder.domain.model.PlaceCategory
 
 @Composable
 fun CategorySection(
-    selectedCategory: String?,
-    onCategorySelected: (String) -> Unit
+    selectedCategory: PlaceCategory,
+    onCategorySelected: (PlaceCategory) -> Unit
 ) {
-    val categories = listOf(
-        Triple("FOOD", Icons.Default.Fastfood, "FOOD"),
-        Triple("GROCERY", Icons.Default.LocalGroceryStore, "GROCERY"),
-        Triple("COFFEE", Icons.Default.Coffee, "COFFEE"),
-        Triple("PHARMACY", Icons.Default.MedicalServices, "PHARMACY"),
-        Triple("MALL", Icons.Default.ShoppingBag, "MALL"),
-        Triple("CLOTHING", Icons.Default.Checkroom, "CLOTHING")
-    )
-
     LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(categories) { (label, icon, category) ->
+        items(PlaceCategory.entries, key = { it.name }) { category ->
             CategoryChip(
-                label = label,
-                icon = icon,
-                isSelected = selectedCategory == category
-            ) {
-                onCategorySelected(category)
-            }
+                label = category.label,
+                isSelected = selectedCategory == category,
+                onClick = { onCategorySelected(category) }
+            )
         }
     }
 }
 
 @Composable
-fun CategoryChip(label: String, icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
+private fun CategoryChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
+    val containerColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val contentColor = if (isSelected) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val border = if (isSelected) {
+        null
+    } else {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    }
+
     Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) Color(0xFF8A7CFF) else Color(0xFF1A1A1E),
-        modifier = Modifier
-            .height(45.dp)
-            .clickable(
-                onClick = onClick,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            )
+        color = containerColor,
+        contentColor = contentColor,
+        border = border,
+        modifier = Modifier.height(36.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = Color.White
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = label,
-                color = Color.White,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+        )
     }
 }

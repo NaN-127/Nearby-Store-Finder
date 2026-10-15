@@ -52,3 +52,19 @@ Thumbs.db
 
 
 *.log
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+*.env.local
+
+# IDE & Editor Configs
+.cursor/
+.vscode/
+.agents/
+
+# Artemis
+traces/
+.artemis/
+

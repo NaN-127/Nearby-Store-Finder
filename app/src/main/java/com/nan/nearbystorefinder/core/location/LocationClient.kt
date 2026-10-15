@@ -19,13 +19,18 @@ import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.coroutines.resume
 
+interface ILocationClient {
+    suspend fun getCurrentLocation(): UserLocation?
+    suspend fun getAddressFromCoords(lat: Double, long: Double): String
+}
+
 class LocationClient(
     private val context: Context
-) {
+) : ILocationClient {
     private val client = LocationServices.getFusedLocationProviderClient(context)
 
     @SuppressLint("MissingPermission")
-    suspend fun getCurrentLocation(): UserLocation?{
+    override suspend fun getCurrentLocation(): UserLocation?{
         return try {
             var location = client.lastLocation.await()
 
@@ -44,7 +49,7 @@ class LocationClient(
         }
     }
 
-    suspend fun getAddressFromCoords(lat: Double, long: Double): String {
+    override suspend fun getAddressFromCoords(lat: Double, long: Double): String {
         return withContext(Dispatchers.IO) {
             try {
                 val geocoder = Geocoder(context, Locale.getDefault())

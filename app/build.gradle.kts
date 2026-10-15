@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     id("com.google.gms.google-services")
-    id("kotlin-kapt")
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -28,11 +28,11 @@ android {
         if (localPropertiesFile.exists()) {
             localProperties.load(localPropertiesFile.inputStream())
         }
-        val geoapifyKey = localProperties.getProperty("GEOAPIFY_API_KEY") ?: ""
         val foursquareKey = localProperties.getProperty("FOURSQUARE_API_KEY") ?: ""
+        val placesApiKey = localProperties.getProperty("PLACES_API_KEY") ?: ""
 
-        buildConfigField("String", "GEOAPIFY_API_KEY", "\"$geoapifyKey\"")
         buildConfigField("String", "FOURSQUARE_API_KEY", "\"$foursquareKey\"")
+        buildConfigField("String", "PLACES_API_KEY", "\"$placesApiKey\"")
     }
 
     buildTypes {
@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("com.google.android.material:material:1.12.0")
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("app.cash.turbine:turbine:1.0.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -86,14 +88,26 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // Places SDK for Android (New) - secure client-side access to Places API (New);
+    // key is restricted by package name + SHA-1 in Google Cloud Console (no backend needed).
+    // Pinned to 4.4.1 rather than the newest 5.x/6.x release: those versions declare
+    // a *strict* kotlin-stdlib:2.2.0 dependency, which forces the whole project onto
+    // Kotlin 2.2.0 and breaks Room's kapt/KSP annotation processing on this project's
+    // Kotlin 2.0.21 toolchain. 4.4.1 still has searchNearby/searchByText/Photos (New)
+    // (added in 3.3.0) without that forced bump.
+    implementation("com.google.android.libraries.places:places:4.4.1")
+
     // Coil
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // Room
+    // Room (migrated from kapt to KSP: adding the Places SDK pins kotlin-stdlib
+    // to 2.2.0, whose metadata format kapt's bundled kotlinx-metadata-jvm reader
+    // can't parse. KSP reads Kotlin metadata via the compiler directly and has
+    // no such version ceiling.)
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     // Ktor
     val ktorVersion = "2.3.7"
