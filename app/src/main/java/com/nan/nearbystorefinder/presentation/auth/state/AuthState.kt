@@ -1,7 +1,6 @@
 package com.nan.nearbystorefinder.presentation.auth.state
 
-
-
+import com.google.firebase.auth.FirebaseUser
 
 data class AuthState(
     val fullName: String = "",
@@ -12,6 +11,7 @@ data class AuthState(
     val passwordError: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val user: com.google.firebase.auth.FirebaseUser? = null,
+    val user: FirebaseUser? = null,
+    val isGuest: Boolean = false,
     val isAuthReady: Boolean = false
 )

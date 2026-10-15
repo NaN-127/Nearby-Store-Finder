@@ -9,110 +9,126 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nan.nearbystorefinder.presentation.navigation.Screen
 
 @Composable
 fun NearoBottomBar(navController: NavController) {
     val items = listOf(
-        BottomNavItem(Screen.Home.route, Icons.Default.Home, "HOME"),
-        BottomNavItem(Screen.Favorite.route, Icons.Default.Favorite, "FAVORITES"),
-        BottomNavItem(Screen.Profile.route, Icons.Default.Person, "PROFILE")
+        BottomNavItem(
+            route = Screen.Home.route,
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home,
+            label = "Home"
+        ),
+        BottomNavItem(
+            route = Screen.Search.route,
+            selectedIcon = Icons.Filled.Search,
+            unselectedIcon = Icons.Outlined.Search,
+            label = "Search"
+        ),
+        BottomNavItem(
+            route = Screen.Favorite.route,
+            selectedIcon = Icons.Filled.Favorite,
+            unselectedIcon = Icons.Outlined.FavoriteBorder,
+            label = "Favorites"
+        ),
+        BottomNavItem(
+            route = Screen.Profile.route,
+            selectedIcon = Icons.Filled.Person,
+            unselectedIcon = Icons.Outlined.Person,
+            label = "Profile"
+        )
     )
 
-    val navBackStackEntry = navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry.value?.destination?.route
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
             .navigationBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
-            .height(72.dp)
-            .clip(RoundedCornerShape(36.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1A1A1F).copy(alpha = 0.95f),
-                        Color(0xFF0B0B0F).copy(alpha = 0.98f)
-                    )
-                )
-            ),
-        contentAlignment = Alignment.Center
     ) {
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 0.5.dp
+        )
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEach { item ->
                 val isSelected = currentRoute == item.route
+                val contentColor = if (isSelected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                }
+                val interactionSource = remember { MutableInteractionSource() }
 
-                Column(
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(20.dp))
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
+                            interactionSource = interactionSource,
+                            indication = null,
+                            role = Role.Tab
                         ) {
+                            android.util.Log.d("NearoNav", "BottomBar clicked item: ${item.route}, currentRoute: $currentRoute")
                             if (currentRoute != item.route) {
                                 navController.navigate(item.route) {
-                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
                             }
-                        }
-                        .padding(vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    if (isSelected) {
-                        Surface(
-                            color = Color(0xFF8A7CFF).copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.label,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = Color(0xFF8A7CFF)
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    text = item.label,
-                                    color = Color(0xFF8A7CFF),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Icon(
-                            imageVector = item.icon,
+                            imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.label,
-                            modifier = Modifier.size(24.dp),
-                            tint = Color.Gray.copy(alpha = 0.7f)
+                            modifier = Modifier.size(22.dp),
+                            tint = contentColor
+                        )
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            text = item.label,
+                            color = contentColor,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                         )
                     }
                 }
@@ -123,6 +139,7 @@ fun NearoBottomBar(navController: NavController) {
 
 data class BottomNavItem(
     val route: String,
-    val icon: ImageVector,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
     val label: String
 )
